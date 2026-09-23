@@ -9,12 +9,27 @@ import { authRouter } from "./modules/auth/auth.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
 import { managerRouter } from "./modules/manager/manager.routes.js";
 
+function isAllowedCorsOrigin(origin: string) {
+  if (origin === config.corsOrigin) {
+    return true;
+  }
+
+  return config.nodeEnv !== "production" && /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+}
+
 export function createApp() {
   const app = express();
 
   app.use(
     cors({
-      origin: config.corsOrigin,
+      origin(origin, callback) {
+        if (!origin || isAllowedCorsOrigin(origin)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(new Error(`CORS origin not allowed: ${origin}`));
+      },
     }),
   );
   app.use(express.json());
