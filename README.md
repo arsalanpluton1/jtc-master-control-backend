@@ -7,6 +7,7 @@ Node.js, TypeScript, Express, and MongoDB API for JTC Master Control.
 ```bash
 npm install
 cp .env.example .env
+docker compose up -d mongo
 npm run dev
 ```
 
@@ -16,6 +17,16 @@ npm run dev
 - `npm run build`: compile TypeScript to `dist`.
 - `npm run create:initial-admin`: create or update the first Admin account from environment variables after a build.
 - `npm start`: run the compiled API.
+
+## Local MongoDB
+
+For local development, start Docker Desktop and run:
+
+```bash
+docker compose up -d mongo
+```
+
+The default `.env.example` points to this local database at `mongodb://127.0.0.1:27017/jtc-master-control`.
 
 ## Environment Variables
 
