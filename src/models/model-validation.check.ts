@@ -11,6 +11,7 @@ import {
   StoreStockModel,
   UserAccountModel,
 } from "./index.js";
+import { STORE_STATUSES, STORE_TYPES } from "./model.constants.js";
 
 const id = () => new Types.ObjectId();
 
@@ -49,6 +50,30 @@ async function run() {
     }),
   );
 
+  for (const status of STORE_STATUSES) {
+    await expectValid(
+      `store status ${status}`,
+      new StoreModel({
+        name: `JTC ${status}`,
+        code: `JTC-${status.replace(/_/g, "-").toUpperCase()}`.slice(0, 24),
+        slug: `jtc-${status.replace(/_/g, "-")}`,
+        status,
+      }),
+    );
+  }
+
+  for (const storeType of STORE_TYPES) {
+    await expectValid(
+      `store type ${storeType}`,
+      new StoreModel({
+        name: `JTC ${storeType}`,
+        code: `JTC-${storeType.replace(/_/g, "-").toUpperCase()}`.slice(0, 24),
+        slug: `jtc-${storeType.replace(/_/g, "-")}`,
+        storeType,
+      }),
+    );
+  }
+
   await expectValid(
     "user account",
     new UserAccountModel({
@@ -67,6 +92,19 @@ async function run() {
       role: "manager",
       status: "active",
       employeeCode: "MGR-1",
+      contactPhone: "+1 555 0100",
+    }),
+  );
+
+  await expectValid(
+    "store employee without login account",
+    new StoreEmployeeModel({
+      storeId,
+      displayName: "Cafe Barista",
+      role: "barista",
+      status: "active",
+      employeeCode: "BAR-1",
+      contactPhone: "+1 555 0101",
     }),
   );
 
@@ -150,6 +188,23 @@ async function run() {
   );
 
   await expectInvalid("store missing code", new StoreModel({ name: "No Code", slug: "no-code" }));
+  await expectInvalid(
+    "store unsupported status",
+    new StoreModel({ name: "Bad Status", code: "BAD-STATUS", slug: "bad-status", status: "active" }),
+  );
+  await expectInvalid(
+    "store unsupported type",
+    new StoreModel({ name: "Bad Type", code: "BAD-TYPE", slug: "bad-type", storeType: "express" }),
+  );
+  await expectInvalid(
+    "other employee missing position title",
+    new StoreEmployeeModel({
+      storeId,
+      displayName: "Flexible Employee",
+      role: "other",
+      status: "active",
+    }),
+  );
   await expectInvalid(
     "line item over-approved",
     new InventoryRequestLineItemModel({

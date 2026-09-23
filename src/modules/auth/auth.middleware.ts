@@ -84,7 +84,7 @@ export async function assertStoreAccess(req: Request, _res: Response, next: Next
     status: "active",
   }).lean();
 
-  const store = await StoreModel.findOne({ _id: requestedStoreId, status: "active" }).lean();
+  const store = await StoreModel.findOne({ _id: requestedStoreId, isActive: true }).lean();
 
   if (!storeEmployee || !store) {
     next(httpError(403, "Assigned store access is no longer active"));

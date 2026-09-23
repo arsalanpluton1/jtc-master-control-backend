@@ -60,7 +60,7 @@ authRouter.post("/login", async (req, res, next) => {
         throw httpError(403, "Store Manager account is not assigned to an active store");
       }
 
-      const store = await StoreModel.findOne({ _id: storeEmployee.storeId, status: "active" }).lean();
+      const store = await StoreModel.findOne({ _id: storeEmployee.storeId, isActive: true }).lean();
 
       if (!store) {
         throw httpError(403, "Assigned store is not active");

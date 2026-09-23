@@ -61,6 +61,9 @@ The script upserts an `active` `admin` user and stores only a salted `scrypt` pa
 - `GET /api/auth/me`: returns the current authenticated dashboard user.
 - `GET /api/admin/overview`: Admin-only Phase 1 overview counts.
 - `GET /api/admin/stores`: Admin-only store list.
+- `GET /api/admin/stations`: Admin-only station list with assigned store summaries.
+- `GET /api/admin/stations/:stationId`: Admin-only station detail.
+- `POST /api/admin/stations`: Admin-only station creation.
 - `GET /api/manager/stores/:storeId/summary`: protected store summary. Store Managers are denied unless `:storeId` matches their active manager assignment.
 
 ## Auth Verification

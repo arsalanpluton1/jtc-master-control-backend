@@ -4,6 +4,11 @@ import { promisify } from "node:util";
 const scrypt = promisify(scryptCallback);
 const keyLength = 64;
 const saltLength = 16;
+const temporaryPasswordBytes = 18;
+
+export function generateTemporaryPassword() {
+  return randomBytes(temporaryPasswordBytes).toString("base64url");
+}
 
 export async function hashPassword(password: string) {
   const salt = randomBytes(saltLength).toString("base64url");

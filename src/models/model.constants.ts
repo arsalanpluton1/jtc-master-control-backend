@@ -1,5 +1,8 @@
-export const STORE_STATUSES = ["active", "inactive", "closed"] as const;
+export const STORE_STATUSES = ["planning", "construction", "open", "temporarily_closed", "closed"] as const;
 export type StoreStatus = (typeof STORE_STATUSES)[number];
+
+export const STORE_TYPES = ["standard", "flagship", "kiosk", "drive_thru"] as const;
+export type StoreType = (typeof STORE_TYPES)[number];
 
 export const USER_ACCOUNT_STATUSES = ["invited", "active", "suspended", "disabled"] as const;
 export type UserAccountStatus = (typeof USER_ACCOUNT_STATUSES)[number];
@@ -7,7 +10,7 @@ export type UserAccountStatus = (typeof USER_ACCOUNT_STATUSES)[number];
 export const USER_ACCOUNT_ROLES = ["admin", "manager", "employee"] as const;
 export type UserAccountRole = (typeof USER_ACCOUNT_ROLES)[number];
 
-export const STORE_EMPLOYEE_ROLES = ["manager", "employee"] as const;
+export const STORE_EMPLOYEE_ROLES = ["manager", "employee", "barista", "trainee", "cleaner", "other"] as const;
 export type StoreEmployeeRole = (typeof STORE_EMPLOYEE_ROLES)[number];
 
 export const STORE_EMPLOYEE_STATUSES = ["active", "inactive", "terminated"] as const;

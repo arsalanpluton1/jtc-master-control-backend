@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+import path from "node:path";
 import { config } from "./config/env.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { notFoundHandler } from "./middleware/not-found-handler.js";
@@ -17,6 +18,7 @@ export function createApp() {
     }),
   );
   app.use(express.json());
+  app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
   app.use("/api/auth", authRouter);
   app.use("/api/admin", adminRouter);

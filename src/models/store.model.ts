@@ -1,5 +1,5 @@
 import { model, Schema, type InferSchemaType } from "mongoose";
-import { STORE_STATUSES } from "./model.constants.js";
+import { STORE_STATUSES, STORE_TYPES } from "./model.constants.js";
 
 const storeSchema = new Schema(
   {
@@ -28,10 +28,21 @@ const storeSchema = new Schema(
       maxlength: 80,
       match: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
     },
+    storeType: {
+      type: String,
+      enum: STORE_TYPES,
+      default: "standard",
+      required: true,
+    },
     status: {
       type: String,
       enum: STORE_STATUSES,
-      default: "active",
+      default: "planning",
+      required: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
       required: true,
     },
     timezone: {
@@ -53,6 +64,28 @@ const storeSchema = new Schema(
       trim: true,
       maxlength: 40,
     },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: 160,
+      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    },
+    manager: {
+      type: String,
+      trim: true,
+      maxlength: 120,
+    },
+    expectedOpenDate: {
+      type: Date,
+    },
+    coverPhoto: {
+      url: { type: String, trim: true, maxlength: 320 },
+      path: { type: String, trim: true, maxlength: 320 },
+      originalName: { type: String, trim: true, maxlength: 220 },
+      mimeType: { type: String, trim: true, maxlength: 80 },
+      size: { type: Number, min: 0 },
+    },
   },
   {
     collection: "stores",
@@ -62,6 +95,7 @@ const storeSchema = new Schema(
 
 storeSchema.index({ code: 1 }, { unique: true });
 storeSchema.index({ slug: 1 }, { unique: true });
+storeSchema.index({ storeType: 1, status: 1, name: 1 });
 storeSchema.index({ status: 1, name: 1 });
 
 export type Store = InferSchemaType<typeof storeSchema>;
