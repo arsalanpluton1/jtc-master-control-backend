@@ -4,5 +4,6 @@ build/
 *.tsbuildinfo
 .env
 .env.local
+.env.example
 npm-debug.log*
 .DS_Store

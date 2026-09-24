@@ -12,6 +12,7 @@ import {
   UserAccountModel,
 } from "./index.js";
 import { STORE_STATUSES, STORE_TYPES } from "./model.constants.js";
+import { calculateSmallestUnitCostCents } from "../modules/admin/inventory-cost.js";
 
 const id = () => new Types.ObjectId();
 
@@ -117,13 +118,80 @@ async function run() {
     }),
   );
 
+  await expectInvalid("station missing store", new StationModel({ name: "No Store", code: "NO-STORE" }));
+  await expectInvalid("station missing name", new StationModel({ storeId, code: "NO-NAME" }));
+  await expectInvalid(
+    "station unsupported status",
+    new StationModel({ storeId, name: "Bad Status", code: "BAD-STATUS", status: "open" }),
+  );
+  await expectInvalid(
+    "station negative sort order",
+    new StationModel({ storeId, name: "Bad Sort", code: "BAD-SORT", sortOrder: -1 }),
+  );
+
   await expectValid(
     "inventory item",
     new InventoryItemModel({
       name: "Coffee Beans",
       sku: "COFFEE-BEAN",
       category: "Beverage",
+      purchaseUnit: "case",
       baseUnit: "gram",
+      packagingLevels: [
+        { parentUnit: "case", childUnit: "box", quantity: 10 },
+        { parentUnit: "box", childUnit: "gram", quantity: 500 },
+      ],
+      purchasePriceCents: 33600,
+    }),
+  );
+
+  const smallestUnitCostCents = calculateSmallestUnitCostCents({
+    purchaseUnit: "case",
+    baseUnit: "gram",
+    purchasePriceCents: 33600,
+    packagingLevels: [
+      { parentUnit: "case", childUnit: "box", quantity: 10 },
+      { parentUnit: "box", childUnit: "gram", quantity: 500 },
+    ],
+  });
+
+  if (smallestUnitCostCents !== 6.72) {
+    throw new Error(`Expected smallest unit cost 6.72 cents, got ${smallestUnitCostCents}`);
+  }
+
+  console.log("ok inventory smallest unit cost");
+
+  await expectInvalid(
+    "inventory item missing purchase price",
+    new InventoryItemModel({
+      name: "Missing Price",
+      sku: "MISSING-PRICE",
+      category: "Beverage",
+      purchaseUnit: "case",
+      baseUnit: "gram",
+    }),
+  );
+  await expectInvalid(
+    "inventory item negative purchase price",
+    new InventoryItemModel({
+      name: "Negative Price",
+      sku: "NEGATIVE-PRICE",
+      category: "Beverage",
+      purchaseUnit: "case",
+      baseUnit: "gram",
+      purchasePriceCents: -1,
+    }),
+  );
+  await expectInvalid(
+    "inventory item invalid packaging quantity",
+    new InventoryItemModel({
+      name: "Invalid Packaging",
+      sku: "INVALID-PACKAGING",
+      category: "Beverage",
+      purchaseUnit: "case",
+      baseUnit: "gram",
+      packagingLevels: [{ parentUnit: "case", childUnit: "gram", quantity: 0 }],
+      purchasePriceCents: 100,
     }),
   );
 
@@ -183,6 +251,16 @@ async function run() {
       status: "active",
       recipeId,
       priceCents: 350,
+      category: "Drinks",
+    }),
+  );
+
+  await expectInvalid(
+    "product non-integer price",
+    new ProductModel({
+      name: "Fractional Price",
+      sku: "FRACTIONAL-PRICE",
+      priceCents: 125.5,
       category: "Drinks",
     }),
   );

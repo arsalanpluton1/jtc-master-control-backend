@@ -72,10 +72,33 @@ The script upserts an `active` `admin` user and stores only a salted `scrypt` pa
 - `GET /api/auth/me`: returns the current authenticated dashboard user.
 - `GET /api/admin/overview`: Admin-only Phase 1 overview counts.
 - `GET /api/admin/stores`: Admin-only store list.
+- `GET /api/admin/recipes`: Admin-only recipe list with inventory ingredient and costing summaries.
+- `GET /api/admin/recipes/:recipeId`: Admin-only recipe detail with ingredient cost and cost-per-yield summaries.
+- `POST /api/admin/recipes`: Admin-only recipe creation with inventory reference validation.
+- `PUT /api/admin/recipes/:recipeId`: Admin-only recipe update with inventory reference validation.
+- `GET /api/admin/products`: Admin-only product list with recipe ingredient-cost and product-cost summaries.
+- `GET /api/admin/products/:productId`: Admin-only product detail with selling price, labor cost, other cost, and calculated product cost.
+- `GET /api/admin/products/:productId/cost`: Admin-only pricing and P&L cost contract with product cost and gross-margin summaries.
+- `POST /api/admin/products`: Admin-only product creation with catalog and cost-input validation.
+- `PUT /api/admin/products/:productId`: Admin-only product update with catalog and cost-input validation.
+- `GET /api/admin/inventory`: Admin-only inventory list with store stock summaries.
+- `GET /api/admin/inventory/:inventoryItemId`: Admin-only inventory item detail with store stock summaries.
+- `POST /api/admin/inventory`: Admin-only inventory item creation with an associated store and initial stock quantity.
+- `PATCH /api/admin/inventory/:inventoryItemId`: Admin-only inventory source-data update; affected recipe and product costs are recalculated from the latest values.
+- `PATCH /api/admin/inventory/:inventoryItemId/packaging`: Admin-only multilevel packaging conversion updates.
+- `PATCH /api/admin/inventory/:inventoryItemId/stores/:storeId/stock`: Admin-only store-level stock quantity and threshold updates.
+- `GET /api/admin/inventory-requests`: Admin-only inventory request review list.
+- `GET /api/admin/inventory-requests/:inventoryRequestId`: Admin-only inventory request detail.
+- `PATCH /api/admin/inventory-requests/:inventoryRequestId/decision`: Admin-only approve/reject decision for submitted requests.
+- `PATCH /api/admin/inventory-requests/:inventoryRequestId/fulfillment`: Admin-only partial or full fulfillment with store-stock deduction.
 - `GET /api/admin/stations`: Admin-only station list with assigned store summaries.
 - `GET /api/admin/stations/:stationId`: Admin-only station detail.
 - `POST /api/admin/stations`: Admin-only station creation.
 - `GET /api/manager/stores/:storeId/summary`: protected store summary. Store Managers are denied unless `:storeId` matches their active manager assignment.
+- `GET /api/manager/stores/:storeId/inventory`: protected store inventory available for replenishment requests.
+- `GET /api/manager/stores/:storeId/stations`: protected station options for inventory requests.
+- `GET /api/manager/stores/:storeId/inventory-requests`: protected request history for the store.
+- `POST /api/manager/stores/:storeId/inventory-requests`: protected Store Manager inventory request creation.
 
 ## Auth Verification
 

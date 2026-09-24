@@ -8,6 +8,11 @@ import { adminRouter } from "./modules/admin/admin.routes.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
 import { managerRouter } from "./modules/manager/manager.routes.js";
+import dns  from "node:dns";
+// const dns = require("node:dns");
+
+// Custom DNS for MongoDB Atlas SRV lookup
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 function isAllowedCorsOrigin(origin: string) {
   if (origin === config.corsOrigin) {

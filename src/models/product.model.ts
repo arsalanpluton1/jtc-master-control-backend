@@ -39,6 +39,30 @@ const productSchema = new Schema(
       type: Number,
       required: true,
       min: 0,
+      validate: {
+        validator: Number.isInteger,
+        message: "Price must be a whole number of cents.",
+      },
+    },
+    laborCostCents: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+      validate: {
+        validator: Number.isInteger,
+        message: "Labor cost must be a whole number of cents.",
+      },
+    },
+    otherCostCents: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+      validate: {
+        validator: Number.isInteger,
+        message: "Other cost must be a whole number of cents.",
+      },
     },
     category: {
       type: String,

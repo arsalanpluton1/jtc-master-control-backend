@@ -1,6 +1,37 @@
 import { model, Schema, type InferSchemaType } from "mongoose";
 import { INVENTORY_ITEM_STATUSES, INVENTORY_UNITS } from "./model.constants.js";
 
+const inventoryPackagingLevelSchema = new Schema(
+  {
+    parentUnit: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      match: /^[a-z][a-z0-9_-]{1,31}$/,
+    },
+    childUnit: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      match: /^[a-z][a-z0-9_-]{1,31}$/,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1,
+      validate: {
+        validator(value: number) {
+          return Number.isInteger(value);
+        },
+        message: "Packaging quantity must be a positive whole number.",
+      },
+    },
+  },
+  { _id: false },
+);
+
 const inventoryItemSchema = new Schema(
   {
     name: {
@@ -25,10 +56,30 @@ const inventoryItemSchema = new Schema(
       trim: true,
       maxlength: 80,
     },
+    purchaseUnit: {
+      type: String,
+      enum: INVENTORY_UNITS,
+      required: true,
+    },
     baseUnit: {
       type: String,
       enum: INVENTORY_UNITS,
       required: true,
+    },
+    packagingLevels: {
+      type: [inventoryPackagingLevelSchema],
+      default: [],
+    },
+    purchasePriceCents: {
+      type: Number,
+      required: true,
+      min: 0,
+      validate: {
+        validator(value: number) {
+          return Number.isInteger(value);
+        },
+        message: "purchasePriceCents must be a whole number.",
+      },
     },
     status: {
       type: String,
