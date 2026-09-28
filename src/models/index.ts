@@ -1,6 +1,9 @@
 export * from "./inventory-item.model.js";
+export * from "./inventory-return.model.js";
 export * from "./inventory-request-line-item.model.js";
 export * from "./inventory-request.model.js";
+export * from "./inventory-transaction.model.js";
+export * from "./inventory-transfer.model.js";
 export * from "./model.constants.js";
 export * from "./product.model.js";
 export * from "./recipe.model.js";
@@ -9,3 +12,4 @@ export * from "./store-employee.model.js";
 export * from "./store-stock.model.js";
 export * from "./store.model.js";
 export * from "./user-account.model.js";
+export * from "./warehouse-stock.model.js";

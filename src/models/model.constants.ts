@@ -55,5 +55,52 @@ export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 export const PRODUCT_TYPES = ["prepared_item", "retail_item", "modifier", "bundle"] as const;
 export type ProductType = (typeof PRODUCT_TYPES)[number];
 
-export const INVENTORY_UNITS = ["each", "gram", "kilogram", "milliliter", "liter", "ounce", "pound", "case"] as const;
+export const INVENTORY_UNITS = [
+  "each",
+  "gram",
+  "kilogram",
+  "milliliter",
+  "liter",
+  "ounce",
+  "pound",
+  "case",
+  "piece",
+  "box",
+  "pack",
+  "dozen",
+  "carton",
+] as const;
 export type InventoryUnit = (typeof INVENTORY_UNITS)[number];
+
+export const WAREHOUSE_CODE = "CENTRAL" as const;
+export const WAREHOUSE_TRANSFER_STATUSES = [
+  "draft",
+  "pending_approval",
+  "approved",
+  "dispatched",
+  "received",
+  "completed",
+  "rejected",
+  "cancelled",
+  "partially_received",
+] as const;
+export type WarehouseTransferStatus = (typeof WAREHOUSE_TRANSFER_STATUSES)[number];
+
+export const WAREHOUSE_TRANSACTION_TYPES = [
+  "purchase",
+  "warehouse_receiving",
+  "store_transfer",
+  "store_receiving",
+  "store_return",
+  "warehouse_return",
+  "sale",
+  "consumption",
+  "damage",
+  "loss",
+  "adjustment",
+  "stock_count",
+] as const;
+export type WarehouseTransactionType = (typeof WAREHOUSE_TRANSACTION_TYPES)[number];
+
+export const INVENTORY_RETURN_STATUSES = ["pending", "received", "rejected", "cancelled"] as const;
+export type InventoryReturnStatus = (typeof INVENTORY_RETURN_STATUSES)[number];

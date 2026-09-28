@@ -7,6 +7,8 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "check:models": "npm run build && node dist/models/model-validation.check.js",
+    "seed:demo": "tsx src/scripts/seed-demo-data.ts",
+    "smoke:demo": "tsx src/scripts/smoke-test.ts",
     "create:initial-admin": "node dist/scripts/create-initial-admin.js",
     "start": "node dist/server.js"
   },

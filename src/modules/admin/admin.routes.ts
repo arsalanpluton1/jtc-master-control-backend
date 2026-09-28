@@ -569,6 +569,9 @@ type AdminInventoryItemRecord = {
   name: string;
   sku: string;
   category: string;
+  subcategory?: string | null;
+  barcode?: string | null;
+  supplier?: string | null;
   purchaseUnit?: string;
   baseUnit: string;
   packagingLevels?: Array<{
@@ -579,6 +582,10 @@ type AdminInventoryItemRecord = {
   status: string;
   purchasePriceCents?: number;
   description?: string | null;
+  imageUrl?: string | null;
+  minimumStockLevel?: number;
+  maximumStockLevel?: number | null;
+  notes?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -612,11 +619,18 @@ function toAdminInventoryDto(
     name: item.name,
     sku: item.sku,
     category: item.category,
+    subcategory: item.subcategory,
+    barcode: item.barcode,
+    supplier: item.supplier,
     purchaseUnit: item.purchaseUnit,
     baseUnit: item.baseUnit,
     packagingLevels: item.packagingLevels ?? [],
     status: item.status,
     description: item.description,
+    imageUrl: item.imageUrl,
+    minimumStockLevel: item.minimumStockLevel ?? 0,
+    maximumStockLevel: item.maximumStockLevel,
+    notes: item.notes,
     purchasePriceCents: item.purchasePriceCents,
     smallestUnitCostCents: calculateSmallestUnitCostCents(item),
     stores: stocks.map((stock) => {
@@ -655,6 +669,14 @@ function requiredNumber(body: Record<string, unknown>, key: string, label: strin
     throwValidationError(`${label} is required and must be a number.`);
   }
 
+  return numberValue;
+}
+
+function optionalNumber(body: Record<string, unknown>, key: string, label: string) {
+  const value = body[key];
+  if (value === undefined || value === "") return undefined;
+  const numberValue = typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN;
+  if (!Number.isFinite(numberValue) || numberValue < 0) throwValidationError(`${label} must be a number greater than or equal to 0.`);
   return numberValue;
 }
 
@@ -743,12 +765,17 @@ function parseInventoryPayload(body: Record<string, unknown>) {
   const name = requiredString(body, "name", "Inventory name");
   const sku = requiredString(body, "sku", "SKU").toUpperCase();
   const category = requiredString(body, "category", "Category");
+  const subcategory = optionalString(body, "subcategory");
+  const barcode = optionalString(body, "barcode");
+  const supplier = optionalString(body, "supplier");
   const purchaseUnit = requiredString(body, "purchaseUnit", "Purchase unit");
   const baseUnit = requiredString(body, "baseUnit", "Smallest usable unit");
   const status = optionalString(body, "status") ?? "active";
   const storeId = requiredString(body, "storeId", "Store");
   const purchasePriceCents = requiredNumber(body, "purchasePriceCents", "Purchase price");
   const initialStockQuantity = requiredNumber(body, "initialStockQuantity", "Initial stock quantity");
+  const minimumStockLevel = optionalNumber(body, "minimumStockLevel", "Minimum stock level");
+  const maximumStockLevel = optionalNumber(body, "maximumStockLevel", "Maximum stock level");
 
   if (name.length < 2 || name.length > 160) {
     throwValidationError("Inventory name must be between 2 and 160 characters long.");
@@ -789,12 +816,19 @@ function parseInventoryPayload(body: Record<string, unknown>) {
       name,
       sku,
       category,
+      subcategory,
+      barcode,
+      supplier,
       purchaseUnit,
       baseUnit,
       packagingLevels,
       status,
       purchasePriceCents,
       description: optionalString(body, "description"),
+      imageUrl: optionalString(body, "imageUrl"),
+      minimumStockLevel,
+      maximumStockLevel,
+      notes: optionalString(body, "notes"),
     },
     stock: {
       storeId,
@@ -807,10 +841,15 @@ function parseInventoryItemUpdatePayload(body: Record<string, unknown>) {
   const name = requiredString(body, "name", "Inventory name");
   const sku = requiredString(body, "sku", "SKU").toUpperCase();
   const category = requiredString(body, "category", "Category");
+  const subcategory = optionalString(body, "subcategory");
+  const barcode = optionalString(body, "barcode");
+  const supplier = optionalString(body, "supplier");
   const purchaseUnit = requiredString(body, "purchaseUnit", "Purchase unit");
   const baseUnit = requiredString(body, "baseUnit", "Smallest usable unit");
   const status = optionalString(body, "status") ?? "active";
   const purchasePriceCents = requiredNumber(body, "purchasePriceCents", "Purchase price");
+  const minimumStockLevel = optionalNumber(body, "minimumStockLevel", "Minimum stock level");
+  const maximumStockLevel = optionalNumber(body, "maximumStockLevel", "Maximum stock level");
 
   if (name.length < 2 || name.length > 160) {
     throwValidationError("Inventory name must be between 2 and 160 characters long.");
@@ -842,11 +881,18 @@ function parseInventoryItemUpdatePayload(body: Record<string, unknown>) {
     name,
     sku,
     category,
+    subcategory,
+    barcode,
+    supplier,
     purchaseUnit,
     baseUnit,
     packagingLevels,
     status,
     purchasePriceCents,
+    imageUrl: optionalString(body, "imageUrl"),
+    minimumStockLevel,
+    maximumStockLevel,
+    notes: optionalString(body, "notes"),
   };
 }
 
@@ -1573,7 +1619,7 @@ adminRouter.get("/inventory", async (_req, res, next) => {
   try {
     const items = await InventoryItemModel.find()
       .sort({ status: 1, category: 1, name: 1 })
-      .select("name sku category purchaseUnit baseUnit packagingLevels purchasePriceCents status description createdAt updatedAt")
+      .select("name sku category subcategory barcode supplier purchaseUnit baseUnit packagingLevels purchasePriceCents status description imageUrl minimumStockLevel maximumStockLevel notes createdAt updatedAt")
       .lean();
 
     res.json({ inventory: await buildAdminInventoryDtos(items) });
@@ -1592,7 +1638,7 @@ adminRouter.get("/inventory/:inventoryItemId", async (req, res, next) => {
     }
 
     const item = await InventoryItemModel.findById(inventoryItemId)
-      .select("name sku category purchaseUnit baseUnit packagingLevels purchasePriceCents status description createdAt updatedAt")
+      .select("name sku category subcategory barcode supplier purchaseUnit baseUnit packagingLevels purchasePriceCents status description imageUrl minimumStockLevel maximumStockLevel notes createdAt updatedAt")
       .lean();
 
     if (!item) {
@@ -1716,7 +1762,7 @@ adminRouter.patch("/inventory/:inventoryItemId/stores/:storeId/stock", async (re
 
     const [item, store] = await Promise.all([
       InventoryItemModel.findById(inventoryItemId)
-        .select("name sku category purchaseUnit baseUnit packagingLevels purchasePriceCents status description createdAt updatedAt")
+        .select("name sku category subcategory barcode supplier purchaseUnit baseUnit packagingLevels purchasePriceCents status description imageUrl minimumStockLevel maximumStockLevel notes createdAt updatedAt")
         .lean(),
       StoreModel.findById(storeId).select("name code slug status").lean(),
     ]);

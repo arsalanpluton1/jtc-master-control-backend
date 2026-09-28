@@ -15,6 +15,8 @@ npm run dev
 
 - `npm run dev`: start the API in watch mode.
 - `npm run build`: compile TypeScript to `dist`.
+- `npm run seed:demo`: idempotently add labeled Phase 1 demo data; requires `JTC_DEMO_ADMIN_PASSWORD` and `JTC_DEMO_MANAGER_PASSWORD`.
+- `npm run smoke:demo`: run the live Admin and Store Manager API workflow against `JTC_SMOKE_BASE_URL` (defaults to `http://localhost:4010/api`).
 - `npm run create:initial-admin`: create or update the first Admin account from environment variables after a build.
 - `npm start`: run the compiled API.
 
@@ -50,6 +52,30 @@ AUTH_TOKEN_SECRET="use-a-long-random-secret" \
 MONGODB_URI="mongodb://..." \
 npm run create:initial-admin
 ```
+
+## Demo data and smoke test
+
+For local verification, use a separate development database and temporary demo credentials:
+
+```powershell
+$env:JTC_DEMO_ADMIN_PASSWORD="choose-a-demo-admin-password"
+$env:JTC_DEMO_MANAGER_PASSWORD="choose-a-demo-manager-password"
+npm run seed:demo
+
+$env:PORT="4010"
+npm run dev
+```
+
+In another PowerShell window:
+
+```powershell
+$env:JTC_DEMO_ADMIN_PASSWORD="choose-a-demo-admin-password"
+$env:JTC_DEMO_MANAGER_PASSWORD="choose-a-demo-manager-password"
+$env:JTC_SMOKE_BASE_URL="http://localhost:4010/api"
+npm run smoke:demo
+```
+
+The seed uses only `DEMO-` stores, inventory, recipes, products, employees, and requests, and does not delete existing records.
 
 On Windows PowerShell:
 
@@ -91,6 +117,18 @@ The script upserts an `active` `admin` user and stores only a salted `scrypt` pa
 - `GET /api/admin/inventory-requests/:inventoryRequestId`: Admin-only inventory request detail.
 - `PATCH /api/admin/inventory-requests/:inventoryRequestId/decision`: Admin-only approve/reject decision for submitted requests.
 - `PATCH /api/admin/inventory-requests/:inventoryRequestId/fulfillment`: Admin-only partial or full fulfillment with store-stock deduction.
+- `GET /api/admin/warehouse/overview`: Admin-only Central Warehouse dashboard totals and recent movement.
+- `GET /api/admin/warehouse/stock`: Admin-only warehouse stock with product, supplier, cost, and stock-status data.
+- `GET /api/admin/warehouse/store-stock`: Admin-only store inventory, optionally filtered by `storeId`.
+- `GET /api/admin/warehouse/ledger`: Admin-only inventory movement ledger with transaction and store filters.
+- `POST /api/admin/warehouse/receipts`: Admin-only supplier receiving into Central Warehouse.
+- `POST /api/admin/warehouse/transfers`: Admin-only warehouse-to-store transfer creation.
+- `PATCH /api/admin/warehouse/transfers/:transferId/decision`: Admin-only transfer approval or rejection.
+- `PATCH /api/admin/warehouse/transfers/:transferId/dispatch`: Admin-only approved transfer dispatch and warehouse deduction.
+- `GET /api/admin/warehouse/returns`: Admin-only store return review list.
+- `PATCH /api/admin/warehouse/returns/:returnId/receive`: Admin-only store return receiving into the warehouse.
+- `POST /api/admin/warehouse/adjustments`: Admin-only reasoned stock adjustments for warehouse or store stock.
+- `POST /api/admin/warehouse/stock-counts`: Admin-only physical stock count reconciliation.
 - `GET /api/admin/stations`: Admin-only station list with assigned store summaries.
 - `GET /api/admin/stations/:stationId`: Admin-only station detail.
 - `POST /api/admin/stations`: Admin-only station creation.
@@ -99,6 +137,16 @@ The script upserts an `active` `admin` user and stores only a salted `scrypt` pa
 - `GET /api/manager/stores/:storeId/stations`: protected station options for inventory requests.
 - `GET /api/manager/stores/:storeId/inventory-requests`: protected request history for the store.
 - `POST /api/manager/stores/:storeId/inventory-requests`: protected Store Manager inventory request creation.
+- `GET /api/manager/stores/:storeId/inventory-transfers`: protected warehouse deliveries for the assigned store.
+- `PATCH /api/manager/stores/:storeId/inventory-transfers/:transferId/receive`: protected store receiving with discrepancy reason support.
+- `GET /api/manager/stores/:storeId/warehouse-returns`: protected return history for the assigned store.
+- `POST /api/manager/stores/:storeId/warehouse-returns`: protected store-to-warehouse return request creation.
+
+## Warehouse and inventory flow
+
+The Central Warehouse flow keeps stock balances separate from the existing recipe/product costing flow. Receipts, transfers, store receiving, returns, adjustments, and stock counts all create immutable `InventoryTransaction` ledger records. Warehouse quantities are held in `WarehouseStock`; store quantities remain in `StoreStock`.
+
+Sales and operational consumption are reserved for the future POS/operations integration. The ledger transaction types are already defined so those integrations can append movements without replacing balances directly.
 
 ## Auth Verification
 

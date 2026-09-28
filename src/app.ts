@@ -8,6 +8,8 @@ import { adminRouter } from "./modules/admin/admin.routes.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
 import { managerRouter } from "./modules/manager/manager.routes.js";
+import { adminWarehouseRouter } from "./modules/warehouse/admin-warehouse.routes.js";
+import { managerWarehouseRouter } from "./modules/warehouse/manager-warehouse.routes.js";
 import dns  from "node:dns";
 // const dns = require("node:dns");
 
@@ -41,7 +43,9 @@ export function createApp() {
   app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
   app.use("/api/auth", authRouter);
+  app.use("/api/admin/warehouse", adminWarehouseRouter);
   app.use("/api/admin", adminRouter);
+  app.use("/api/manager", managerWarehouseRouter);
   app.use("/api/manager", managerRouter);
   app.use("/api/health", healthRouter);
 

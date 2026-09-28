@@ -56,6 +56,21 @@ const inventoryItemSchema = new Schema(
       trim: true,
       maxlength: 80,
     },
+    subcategory: {
+      type: String,
+      trim: true,
+      maxlength: 80,
+    },
+    barcode: {
+      type: String,
+      trim: true,
+      maxlength: 80,
+    },
+    supplier: {
+      type: String,
+      trim: true,
+      maxlength: 160,
+    },
     purchaseUnit: {
       type: String,
       enum: INVENTORY_UNITS,
@@ -92,6 +107,25 @@ const inventoryItemSchema = new Schema(
       trim: true,
       maxlength: 1000,
     },
+    imageUrl: {
+      type: String,
+      trim: true,
+      maxlength: 320,
+    },
+    minimumStockLevel: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+    maximumStockLevel: {
+      type: Number,
+      min: 0,
+    },
+    notes: {
+      type: String,
+      trim: true,
+      maxlength: 1000,
+    },
   },
   {
     collection: "inventory_items",
@@ -100,6 +134,7 @@ const inventoryItemSchema = new Schema(
 );
 
 inventoryItemSchema.index({ sku: 1 }, { unique: true });
+inventoryItemSchema.index({ barcode: 1 }, { unique: true, sparse: true });
 inventoryItemSchema.index({ status: 1, category: 1, name: 1 });
 
 export type InventoryItem = InferSchemaType<typeof inventoryItemSchema>;
